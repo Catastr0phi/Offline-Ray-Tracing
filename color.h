@@ -8,9 +8,9 @@
 using color = DirectX::XMFLOAT3;
 
 void WriteColor(std::ostream& out, const color& pixelColor) {
-	auto r = pixelColor.x;
-	auto g = pixelColor.y;
-	auto b = pixelColor.z;
+	float r = pixelColor.x;
+	float g = pixelColor.y;
+	float b = pixelColor.z;
 
 	// Translate [0,1] components to [0,255]
 	int rbyte = int(255.999 * r);
