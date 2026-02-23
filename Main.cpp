@@ -5,7 +5,31 @@
 
 using namespace DirectX;
 
+bool HitSphere(const XMFLOAT3& center, float radius, const ray& r) {
+	XMVECTOR dirVec = XMLoadFloat3(&r.GetDirection());
+
+	XMVECTOR oc = XMVectorSet(center.x - r.GetOrigin().x, 
+		center.y - r.GetOrigin().y,
+		center.z - r.GetOrigin().z, 0);
+
+	XMVECTOR a = XMVector3Dot(dirVec, dirVec);
+
+	XMVECTOR b = -2.0 * XMVector3Dot(dirVec, oc);
+
+	XMVECTOR c = XMVector3Dot(oc, oc) - XMLoadFloat(&radius) * XMLoadFloat(&radius);
+
+	float discriminant;
+	XMVECTOR discriminantVec = XMVectorMultiply(b, b) - 4 * XMVectorMultiply(a, c);
+	XMStoreFloat(&discriminant, discriminantVec);
+	
+	return discriminant >= 0;
+}
+
 color RayColor(const ray& r) {
+	if (HitSphere(XMFLOAT3(0, 0, -1), 0.5, r)) {
+		return color(1, 0, 0);
+	}
+
 	XMFLOAT3 unitDir;
 	XMVECTOR unitDirVector = XMLoadFloat3(&r.GetDirection());
 	unitDirVector = XMVector3Normalize(unitDirVector);
