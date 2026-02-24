@@ -5,6 +5,7 @@
 class Camera {
 private:
 	int imageHeight;
+	double pixelSamplesScale;
 	XMFLOAT3 camCenter;
 	XMFLOAT3 pixel100Loc;
 	XMFLOAT3 pixelDeltaU;
@@ -14,6 +15,8 @@ private:
 		// Calculate height
 		imageHeight = int(imageWidth / aspectRatio);
 		imageHeight = (imageHeight < 1) ? 1 : imageHeight;
+
+		pixelSamplesScale = 1.0 / samplesPerPixel;
 
 		// Camera
 		camCenter = XMFLOAT3(0, 0, 0);
@@ -43,6 +46,33 @@ private:
 		XMStoreFloat3(&pixel100Loc, pixel100LocVector);
 	}
 
+	Ray GetRay(int i, int j) const {
+		// Construct a camera ray originating from the origin and directed at randomly sampled
+		// point around the pixel location i, j.
+
+		XMFLOAT3 offset = SampleSquare();
+
+		XMFLOAT3 pixelSample;
+		XMVECTOR pixelSampleVec = XMLoadFloat3(&pixel100Loc)
+			+ ((i + offset.x)) * XMLoadFloat3(&pixelDeltaU)
+			+ ((j + offset.y)) * XMLoadFloat3(&pixelDeltaV);
+
+		XMStoreFloat3(&pixelSample, pixelSampleVec);
+	
+		XMFLOAT3 rayOrigin = camCenter;
+		XMFLOAT3 rayDirection = XMFLOAT3(
+			pixelSample.x - rayOrigin.x,
+			pixelSample.y - rayOrigin.y,
+			pixelSample.z - rayOrigin.z
+		);
+
+		return Ray(rayOrigin, rayDirection);
+	}
+
+	XMFLOAT3 SampleSquare() const {
+		return XMFLOAT3(RandomDouble() - 0.5, RandomDouble() - 0.5, 0);
+	}
+
 	color RayColor(const Ray& r, const Hittable& world) const {
 		HitRecord rec;
 		if (world.Hit(r, Interval(0, infinity), rec)) {
@@ -66,6 +96,7 @@ private:
 public: 
 	double aspectRatio = 1.0;
 	int imageWidth = 100;
+	int samplesPerPixel = 10;
 
 	void Render(const Hittable& world) {
 		Initialize();
@@ -76,15 +107,18 @@ public:
 		for (int j = 0; j < imageHeight; j++) {
 			std::clog << "\rScanlines remaining: " << (imageHeight - j) << ' ' << std::flush;
 			for (int i = 0; i < imageWidth; i++) {
-				XMFLOAT3 pixelCenter;
-				XMVECTOR pixelCenterVector = XMLoadFloat3(&pixel100Loc) + (i * XMLoadFloat3(&pixelDeltaU)) + (j * XMLoadFloat3(&pixelDeltaV));
-				XMStoreFloat3(&pixelCenter, pixelCenterVector);
+				XMFLOAT3 pixelColor = XMFLOAT3(0, 0, 0);
+				for (int sample = 0; sample < samplesPerPixel; sample++) {
+					Ray r = GetRay(i, j);
+					XMFLOAT3 rayColor = RayColor(r, world);
+					pixelColor = XMFLOAT3(
+						pixelColor.x + rayColor.x,
+						pixelColor.y + rayColor.y,
+						pixelColor.z + rayColor.z
+					);
+				}
 
-				XMFLOAT3 rayDir = XMFLOAT3(pixelCenter.x - camCenter.x, pixelCenter.y - camCenter.y, pixelCenter.z - camCenter.z);
-				Ray r(camCenter, rayDir);
-
-				color pixelColor = RayColor(r, world);
-
+				XMStoreFloat3(&pixelColor, XMLoadFloat3(&pixelColor) * pixelSamplesScale);
 				WriteColor(std::cout, pixelColor);
 			}
 		}
