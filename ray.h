@@ -6,15 +6,15 @@
 
 using namespace DirectX;
 
-class ray {
+class Ray {
 private:
 	XMFLOAT3 orig;
 	XMFLOAT3 dir;
 
 public:
-	ray() {}
+	Ray() {}
 
-	ray(const XMFLOAT3& origin, const XMFLOAT3& direction) :
+	Ray(const XMFLOAT3& origin, const XMFLOAT3& direction) :
 		orig(origin),
 		dir(direction) {
 
