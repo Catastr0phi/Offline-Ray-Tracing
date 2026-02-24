@@ -3,8 +3,7 @@
 #define SPHERE_H
 
 #include "hittable.h"
-#include <DirectXMath.h>
-#include <cmath>
+#include "rtweekend.h"
 
 class Sphere : public Hittable {
 private:
@@ -52,10 +51,12 @@ public:
 		rec.t = root;
 		rec.p = r.At(rec.t);
 
-		XMVECTOR normalVec = (XMVectorSet(rec.p.x, rec.p.y, rec.p.z, 0)
+		XMFLOAT3 outwardNormal;
+		XMVECTOR outwardNormalVec = (XMVectorSet(rec.p.x, rec.p.y, rec.p.z, 0)
 			- XMVectorSet(center.x, center.y, center.z, 0)) / radius;
 
-		XMStoreFloat3(&rec.normal, normalVec);
+		XMStoreFloat3(&outwardNormal, outwardNormalVec);
+		rec.SetFaceNormal(r, outwardNormal);
 
 		return true;
 	}

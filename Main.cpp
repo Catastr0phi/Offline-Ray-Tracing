@@ -1,50 +1,17 @@
-#include <iostream>
-#include "color.h"
-#include <DirectXMath.h>
-#include "ray.h"
+#include "rtweekend.h"
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
 
 using namespace DirectX;
 
-double HitSphere(const XMFLOAT3& center, float radius, const Ray& r) {
-	XMVECTOR dirVec = XMLoadFloat3(&r.GetDirection());
-
-	XMVECTOR oc = XMVectorSet(center.x - r.GetOrigin().x, 
-		center.y - r.GetOrigin().y,
-		center.z - r.GetOrigin().z, 0);
-
-	XMVECTOR a = XMVector3LengthSq(dirVec);
-
-	XMVECTOR h = XMVector3Dot(dirVec, oc);
-
-	XMVECTOR c = XMVector3LengthSq(oc) - XMLoadFloat(&radius) * XMLoadFloat(&radius);
-
-	float discriminant;
-	XMVECTOR discriminantVec = XMVectorMultiply(h, h) - XMVectorMultiply(a, c);
-	XMStoreFloat(&discriminant, discriminantVec);
-	
-	if (discriminant < 0) {
-		return -1.0;
-	}
-	else {
-		float at;
-		XMVECTOR atVec = (h - XMVectorSqrt(discriminantVec)) / a;
-		XMStoreFloat(&at, atVec);
-
-		return at;
-	}
-}
-
-color RayColor(const Ray& r) {
-	double t = (HitSphere(XMFLOAT3(0, 0, -1), 0.5, r));
-
-	if (t > 0.0) {
-		XMFLOAT3 finalColor;
-		XMVECTOR N = XMVectorSet(r.At(t).x, r.At(t).y, r.At(t).z,0);
-		N = N - XMVectorSet(0, 0, -1, 0);
-		N = 0.5 * (N + XMVectorSet(1, 1, 1, 0));
-		XMStoreFloat3(&finalColor, N);
-		return finalColor;
-
+color RayColor(const Ray& r, const Hittable& world) {
+	HitRecord rec;
+	if (world.Hit(r, 0, infinity, rec)) {
+		return XMFLOAT3(
+			0.5 * (rec.normal.x + 1),
+			0.5 * (rec.normal.y + 1),
+			0.5 * (rec.normal.z + 1));
 	}
 
 	XMFLOAT3 unitDir;
@@ -65,6 +32,11 @@ int main() {
 	// Calculate height
 	int imageHeight = int(imageWidth / aspectRatio);
 	imageHeight = (imageHeight < 1) ? 1 : imageHeight;
+
+	// World
+	HittableList world;
+	world.Add(make_shared<Sphere>(XMFLOAT3(0, 0, -1), 0.5));
+	world.Add(make_shared<Sphere>(XMFLOAT3(0, -100.5, -1), 100));
 
 	// Camera
 	double focalLength = 1.0;
@@ -106,7 +78,7 @@ int main() {
 			XMFLOAT3 rayDir = XMFLOAT3(pixelCenter.x - camCenter.x, pixelCenter.y - camCenter.y, pixelCenter.z - camCenter.z);
 			Ray r(camCenter, rayDir);
 
-			color pixelColor = RayColor(r);
+			color pixelColor = RayColor(r, world);
 
 			WriteColor(std::cout, pixelColor);
 		}

@@ -2,7 +2,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include <iostream>
+#include "rtweekend.h"
 #include <DirectXMath.h>
 
 using color = DirectX::XMFLOAT3;
