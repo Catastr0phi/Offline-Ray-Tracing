@@ -5,29 +5,46 @@
 
 using namespace DirectX;
 
-bool HitSphere(const XMFLOAT3& center, float radius, const ray& r) {
+double HitSphere(const XMFLOAT3& center, float radius, const ray& r) {
 	XMVECTOR dirVec = XMLoadFloat3(&r.GetDirection());
 
 	XMVECTOR oc = XMVectorSet(center.x - r.GetOrigin().x, 
 		center.y - r.GetOrigin().y,
 		center.z - r.GetOrigin().z, 0);
 
-	XMVECTOR a = XMVector3Dot(dirVec, dirVec);
+	XMVECTOR a = XMVector3LengthSq(dirVec);
 
-	XMVECTOR b = -2.0 * XMVector3Dot(dirVec, oc);
+	XMVECTOR h = XMVector3Dot(dirVec, oc);
 
-	XMVECTOR c = XMVector3Dot(oc, oc) - XMLoadFloat(&radius) * XMLoadFloat(&radius);
+	XMVECTOR c = XMVector3LengthSq(oc) - XMLoadFloat(&radius) * XMLoadFloat(&radius);
 
 	float discriminant;
-	XMVECTOR discriminantVec = XMVectorMultiply(b, b) - 4 * XMVectorMultiply(a, c);
+	XMVECTOR discriminantVec = XMVectorMultiply(h, h) - XMVectorMultiply(a, c);
 	XMStoreFloat(&discriminant, discriminantVec);
 	
-	return discriminant >= 0;
+	if (discriminant < 0) {
+		return -1.0;
+	}
+	else {
+		float at;
+		XMVECTOR atVec = (h - XMVectorSqrt(discriminantVec)) / a;
+		XMStoreFloat(&at, atVec);
+
+		return at;
+	}
 }
 
 color RayColor(const ray& r) {
-	if (HitSphere(XMFLOAT3(0, 0, -1), 0.5, r)) {
-		return color(1, 0, 0);
+	double t = (HitSphere(XMFLOAT3(0, 0, -1), 0.5, r));
+
+	if (t > 0.0) {
+		XMFLOAT3 finalColor;
+		XMVECTOR N = XMVectorSet(r.At(t).x, r.At(t).y, r.At(t).z,0);
+		N = N - XMVectorSet(0, 0, -1, 0);
+		N = 0.5 * (N + XMVectorSet(1, 1, 1, 0));
+		XMStoreFloat3(&finalColor, N);
+		return finalColor;
+
 	}
 
 	XMFLOAT3 unitDir;
