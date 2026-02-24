@@ -1,6 +1,4 @@
 #pragma once
-#ifndef RTWEEKEND_H
-#define RTWEEKEND_H
 
 #include <cmath>
 #include <iostream>
@@ -25,5 +23,3 @@ inline double DegreesToRadians(double degrees) {
 #include "ray.h"
 #include <DirectXMath.h>
 #include "interval.h"
-
-#endif

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef INTERVAL_H
-#define INTERVAL_H
 
 #include "rtweekend.h"
 
@@ -28,5 +26,3 @@ public:
 
 const Interval Interval::empty = Interval(+infinity, -infinity);
 const Interval Interval::universe = Interval(-infinity, +infinity);
-
-#endif

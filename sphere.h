@@ -1,6 +1,4 @@
 #pragma once
-#ifndef SPHERE_H
-#define SPHERE_H
 
 #include "hittable.h"
 #include "rtweekend.h"
@@ -62,5 +60,3 @@ public:
 	}
 
 };
-
-#endif

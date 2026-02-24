@@ -1,6 +1,4 @@
 #pragma once
-#ifndef RAY_H
-#define RAY_H
 
 #include <DirectXMath.h>
 
@@ -33,8 +31,3 @@ public:
 		return point;
 	}
 };
-
-
-
-
-#endif

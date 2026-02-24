@@ -1,6 +1,4 @@
 #pragma once
-#ifndef HITTABLE_LIST_H
-#define HITTABLE_LIST_H
 
 #include "hittable.h"
 #include "rtweekend.h"
@@ -37,5 +35,3 @@ public:
 		return hitAnything;
 	}
 };
-
-#endif

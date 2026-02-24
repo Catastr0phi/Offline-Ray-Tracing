@@ -1,6 +1,4 @@
 #pragma once
-#ifndef HITTABLE_H
-#define HITTABLE_H
 
 #include "rtweekend.h"
 
@@ -28,5 +26,3 @@ public:
 
 	virtual bool Hit(const Ray& r, Interval rayT, HitRecord& rec) const = 0;
 };
-
-#endif
