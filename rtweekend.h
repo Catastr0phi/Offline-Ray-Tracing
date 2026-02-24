@@ -24,5 +24,6 @@ inline double DegreesToRadians(double degrees) {
 #include "color.h"
 #include "ray.h"
 #include <DirectXMath.h>
+#include "interval.h"
 
 #endif

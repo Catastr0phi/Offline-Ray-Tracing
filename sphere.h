@@ -13,7 +13,7 @@ private:
 public:
 	Sphere(const XMFLOAT3& center, double radius) : center(center), radius(std::fmax(0, radius)) {}
 
-	bool Hit(const Ray& r, double rayTMin, double rayTMax, HitRecord& rec) const override {
+	bool Hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
 		XMVECTOR dirVec = XMLoadFloat3(&r.GetDirection());
 
 		XMVECTOR oc = XMVectorSet(center.x - r.GetOrigin().x,
@@ -41,10 +41,10 @@ public:
 		XMVECTOR rootVec = (h - sqrtd) / a;
 		XMStoreFloat(&root, rootVec);
 
-		if (root <= rayTMin || rayTMax <= root) {
+		if (!rayT.Surrounds(root)) {
 			rootVec = (h + sqrtd) / a;
 			XMStoreFloat(&root, rootVec);
-			if (root <= rayTMin || rayTMax <= root)
+			if (!rayT.Surrounds(root))
 				return false;
 		}
 

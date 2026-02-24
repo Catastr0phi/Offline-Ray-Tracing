@@ -19,15 +19,15 @@ public:
 		objects.push_back(object);
 	}
 
-	bool Hit(const Ray& r, double rayTMin, double rayTMax, HitRecord& rec) const override {
+	bool Hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
 		HitRecord tempRec;
 
 		bool hitAnything = false;
 
-		double closest = rayTMax;
+		double closest = rayT.max;
 
 		for (const shared_ptr<Hittable>& object : objects) {
-			if (object->Hit(r, rayTMin, closest, tempRec)) {
+			if (object->Hit(r,Interval(rayT.min, closest), tempRec)) {
 				hitAnything = true;
 				closest = tempRec.t;
 				rec = tempRec;

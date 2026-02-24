@@ -7,7 +7,7 @@ using namespace DirectX;
 
 color RayColor(const Ray& r, const Hittable& world) {
 	HitRecord rec;
-	if (world.Hit(r, 0, infinity, rec)) {
+	if (world.Hit(r, Interval(0, infinity), rec)) {
 		return XMFLOAT3(
 			0.5 * (rec.normal.x + 1),
 			0.5 * (rec.normal.y + 1),
@@ -27,7 +27,7 @@ color RayColor(const Ray& r, const Hittable& world) {
 
 int main() {
 	double aspectRatio = 16.0 / 9.0;
-	int imageWidth = 400;
+	int imageWidth = 1920;
 
 	// Calculate height
 	int imageHeight = int(imageWidth / aspectRatio);
