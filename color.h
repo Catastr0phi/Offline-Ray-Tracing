@@ -1,6 +1,4 @@
 #pragma once
-#ifndef COLOR_H
-#define COLOR_H
 
 #include "rtweekend.h"
 #include <DirectXMath.h>
@@ -20,6 +18,3 @@ void WriteColor(std::ostream& out, const color& pixelColor) {
 	// Write out pixel color
 	out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
 }
-
-
-#endif
