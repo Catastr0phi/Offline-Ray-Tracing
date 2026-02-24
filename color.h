@@ -6,10 +6,22 @@
 
 using color = DirectX::XMFLOAT3;
 
+inline double LinearToGamma(double linearComponent) {
+	if (linearComponent > 0) {
+		return std::sqrt(linearComponent);
+	}
+
+	return 0;
+}
+
 void WriteColor(std::ostream& out, const color& pixelColor) {
 	float r = pixelColor.x;
 	float g = pixelColor.y;
 	float b = pixelColor.z;
+
+	r = LinearToGamma(r);
+	g = LinearToGamma(g);
+	b = LinearToGamma(b);
 
 	// Translate [0,1] components to [0,255]
 	static const Interval intensity(0.000, 0.999);

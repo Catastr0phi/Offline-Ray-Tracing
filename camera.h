@@ -73,13 +73,23 @@ private:
 		return XMFLOAT3(RandomDouble() - 0.5, RandomDouble() - 0.5, 0);
 	}
 
-	color RayColor(const Ray& r, const Hittable& world) const {
+	color RayColor(const Ray& r, int depth, const Hittable& world) const {
+		if (depth <= 0) {
+			return XMFLOAT3(0, 0, 0);
+		}
+		
 		HitRecord rec;
-		if (world.Hit(r, Interval(0, infinity), rec)) {
+		if (world.Hit(r, Interval(0.001, infinity), rec)) {
+			XMFLOAT3 randomVector = RandomUnitVector();
+			XMFLOAT3 direction = XMFLOAT3(
+				rec.normal.x + randomVector.x,
+				rec.normal.y + randomVector.y,
+				rec.normal.z + randomVector.z);
+			XMFLOAT3 currentColor = RayColor(Ray(rec.p, direction), depth-1, world);
 			return XMFLOAT3(
-				0.5 * (rec.normal.x + 1),
-				0.5 * (rec.normal.y + 1),
-				0.5 * (rec.normal.z + 1));
+				0.5 * currentColor.x,
+				0.5 * currentColor.y,
+				0.5 * currentColor.z);
 		}
 
 		XMFLOAT3 unitDir;
@@ -97,6 +107,7 @@ public:
 	double aspectRatio = 1.0;
 	int imageWidth = 100;
 	int samplesPerPixel = 10;
+	int maxDepth = 10;
 
 	void Render(const Hittable& world) {
 		Initialize();
@@ -110,7 +121,7 @@ public:
 				XMFLOAT3 pixelColor = XMFLOAT3(0, 0, 0);
 				for (int sample = 0; sample < samplesPerPixel; sample++) {
 					Ray r = GetRay(i, j);
-					XMFLOAT3 rayColor = RayColor(r, world);
+					XMFLOAT3 rayColor = RayColor(r, maxDepth, world);
 					pixelColor = XMFLOAT3(
 						pixelColor.x + rayColor.x,
 						pixelColor.y + rayColor.y,

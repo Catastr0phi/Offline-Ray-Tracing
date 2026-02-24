@@ -30,5 +30,5 @@ inline double RandomDouble(double min, double max) {
 // Common headers
 #include "color.h"
 #include "ray.h"
-#include <DirectXMath.h>
 #include "interval.h"
+#include "vector_utils.h"
