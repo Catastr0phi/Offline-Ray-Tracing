@@ -13,13 +13,15 @@ int main() {
 
 	shared_ptr<Material> groundMat = make_shared<Lambertian>(XMFLOAT3(0.8, 0.8, 0.0));
 	shared_ptr<Material> centerMat = make_shared<Lambertian>(XMFLOAT3(0.8, 0.0, 0.5));
-	shared_ptr<Material> leftMat = make_shared<Metal>(XMFLOAT3(0.8, 0.8, 0.8), 0.1);
+	shared_ptr<Material> leftMat = make_shared<Dielectric>(1.5);
+	shared_ptr<Material> bubbleMat = make_shared<Dielectric>(1.0/1.5);
 	shared_ptr<Material> rightMat = make_shared<Metal>(XMFLOAT3(0.8, 0.6, 0.2), 0.3);
 
-	/*world.Add(make_shared<Sphere>(XMFLOAT3(0, -100.5, -1), 100, groundMat));
+	world.Add(make_shared<Sphere>(XMFLOAT3(0, -100.5, -1), 100, groundMat));
 	world.Add(make_shared<Sphere>(XMFLOAT3(0, 0, -1.2), 0.5, centerMat));
 	world.Add(make_shared<Sphere>(XMFLOAT3(-1, 0, -1), 0.5, leftMat));
-	world.Add(make_shared<Sphere>(XMFLOAT3(1, 0, -1), 0.5, rightMat));*/
+	world.Add(make_shared<Sphere>(XMFLOAT3(-1, 0, -1), 0.4, bubbleMat));
+	world.Add(make_shared<Sphere>(XMFLOAT3(1, 0, -1), 0.5, rightMat));
 
 	//for (int i = 0; i < 10; i++) {
 	//	shared_ptr<Material> currentMat;
@@ -33,11 +35,11 @@ int main() {
 	//	), RandomDouble(0.05, 0.1), currentMat));
 	//}
 
-	for (float i = 0.0; i < 11.0; i++) {
-		shared_ptr<Material> fuzzMat = make_shared<Metal>(XMFLOAT3(0.8, 0.8, 0.8), i/10.0);
+	//for (float i = 0.0; i < 11.0; i++) {
+	//	shared_ptr<Material> fuzzMat = make_shared<Metal>(XMFLOAT3(0.8, 0.8, 0.8), i/10.0);
 
-		world.Add(make_shared<Sphere>(XMFLOAT3((i / 5.0) - 1.0, 0, -0.6), 0.09, fuzzMat));
-	}
+	//	world.Add(make_shared<Sphere>(XMFLOAT3((i / 5.0) - 1.0, 0, -0.6), 0.09, fuzzMat));
+	//}
 
 	Camera cam;
 

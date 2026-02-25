@@ -70,3 +70,45 @@ public:
 		return dot > 0;
 	}
 };
+
+class Dielectric : public Material {
+private:
+	double refractionIndex;
+
+	static double Reflectance(double cosine, double refractionIndex) {
+		// Schlicks approximation
+		double r0 = (1 - refractionIndex) / (1 + refractionIndex);
+		r0 = r0 * r0;
+		return r0 + (1 - r0) * std::pow((1 - cosine), 5);
+	}
+
+public:
+	Dielectric(double refractionIndex) : refractionIndex(refractionIndex) {}
+
+	bool Scatter(const Ray& rIn, const HitRecord& rec, XMFLOAT3& attenuation, Ray& scattered)
+		const override {
+		attenuation = XMFLOAT3(1.0, 1.0, 1.0);
+
+		double ri = rec.frontFace ? (1.0 / refractionIndex) : refractionIndex;
+
+		XMVECTOR unitDir = XMVector3Normalize(XMLoadFloat3(&rIn.GetDirection()));
+		XMVECTOR normal = XMLoadFloat3(&rec.normal);
+		float cosTheta;
+		XMStoreFloat(&cosTheta, XMVector3Dot(-unitDir,normal));
+		cosTheta = std::fmin(cosTheta, 1.0);
+		float sinTheta = std::sqrt(1.0-cosTheta*cosTheta);
+
+		bool cannotRefract = ri * sinTheta > 1.0;
+
+		XMFLOAT3 direction;
+		XMVECTOR directionVec;
+
+		if (cannotRefract || Reflectance(cosTheta, ri) > RandomDouble()) directionVec = XMVector3Reflect(unitDir, normal);
+		else directionVec = XMVector3Refract(unitDir, normal, ri);
+
+		XMStoreFloat3(&direction, directionVec);
+
+		scattered = Ray(rec.p, direction);
+		return true;
+	}
+};
