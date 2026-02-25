@@ -7,9 +7,10 @@ class Sphere : public Hittable {
 private:
 	XMFLOAT3 center;
 	float radius;
+	shared_ptr<Material> mat;
 
 public:
-	Sphere(const XMFLOAT3& center, double radius) : center(center), radius(std::fmax(0, radius)) {}
+	Sphere(const XMFLOAT3& center, double radius, shared_ptr<Material> mat) : center(center), radius(std::fmax(0, radius)), mat(mat) {}
 
 	bool Hit(const Ray& r, Interval rayT, HitRecord& rec) const override {
 		XMVECTOR dirVec = XMLoadFloat3(&r.GetDirection());
@@ -55,6 +56,7 @@ public:
 
 		XMStoreFloat3(&outwardNormal, outwardNormalVec);
 		rec.SetFaceNormal(r, outwardNormal);
+		rec.mat = mat;
 
 		return true;
 	}

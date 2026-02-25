@@ -2,10 +2,13 @@
 
 #include "rtweekend.h"
 
+class Material;
+
 class HitRecord {
 public:
 	XMFLOAT3 p;
 	XMFLOAT3 normal;
+	shared_ptr<Material> mat;
 	double t;
 	bool frontFace;
 

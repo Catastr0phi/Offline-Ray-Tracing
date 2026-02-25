@@ -38,3 +38,8 @@ inline XMFLOAT3 RandomOnHemisphere(const XMFLOAT3& normal) {
 			-onUnitSphere.z);
 	}
 }
+
+inline bool NearZero(const XMFLOAT3& vec) {
+	double s = 1e-8;
+	return (std::fabs(vec.x) < s) && (std::fabs(vec.y) < s) && (std::fabs(vec.z) < s);
+}

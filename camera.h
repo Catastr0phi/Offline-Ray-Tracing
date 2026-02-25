@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hittable.h"
+#include "material.h"
 
 class Camera {
 private:
@@ -80,16 +81,16 @@ private:
 		
 		HitRecord rec;
 		if (world.Hit(r, Interval(0.001, infinity), rec)) {
-			XMFLOAT3 randomVector = RandomUnitVector();
-			XMFLOAT3 direction = XMFLOAT3(
-				rec.normal.x + randomVector.x,
-				rec.normal.y + randomVector.y,
-				rec.normal.z + randomVector.z);
-			XMFLOAT3 currentColor = RayColor(Ray(rec.p, direction), depth-1, world);
-			return XMFLOAT3(
-				0.5 * currentColor.x,
-				0.5 * currentColor.y,
-				0.5 * currentColor.z);
+			Ray scattered;
+			XMFLOAT3 attenuation;
+			if (rec.mat->Scatter(r, rec, attenuation, scattered)) {
+				XMFLOAT3 currentColor = RayColor(scattered, depth - 1, world);
+				XMFLOAT3 attenuated;
+				XMVECTOR attenuatedVec = XMVectorMultiply(XMLoadFloat3(&attenuation), XMLoadFloat3(&currentColor));
+				XMStoreFloat3(&attenuated, attenuatedVec);
+				return attenuated;
+			}
+			return color(0, 0, 0);
 		}
 
 		XMFLOAT3 unitDir;
