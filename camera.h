@@ -11,6 +11,9 @@ private:
 	XMFLOAT3 pixel100Loc;
 	XMFLOAT3 pixelDeltaU;
 	XMFLOAT3 pixelDeltaV;
+	XMFLOAT3 u, v, w;
+	XMFLOAT3 defocusDiskU;
+	XMFLOAT3 defocusDiskV;
 
 	void Initialize() {
 		// Calculate height
@@ -19,32 +22,60 @@ private:
 
 		pixelSamplesScale = 1.0 / samplesPerPixel;
 
+		// Get some vectors
+		XMVECTOR lookFromVec = XMLoadFloat3(&lookFrom);
+		XMVECTOR lookAtVec = XMLoadFloat3(&lookAt);
+		XMVECTOR vupVec = XMLoadFloat3(&vup);
+
 		// Camera
-		camCenter = XMFLOAT3(0, 0, 0);
-		double focalLength = 1.0;
-		double viewportHeight = 2.0;
+		camCenter = lookFrom;
+		double theta = DegreesToRadians(vfov);
+		double h = std::tan(theta / 2);
+		double viewportHeight = 2 * h * focusDist;
 		double viewportWidth = viewportHeight * (double(imageWidth) / imageHeight);
 
+		// Calculate u,v,w vectors
+		XMVECTOR wVec = XMVector3Normalize(lookFromVec - lookAtVec);
+		XMVECTOR uVec = XMVector3Normalize(XMVector3Cross(vupVec, wVec));
+		XMVECTOR vVec = XMVector3Cross(wVec, uVec);
+		XMStoreFloat3(&w, wVec);
+		XMStoreFloat3(&u, uVec);
+		XMStoreFloat3(&v, vVec);
+
 		// Calculate vectors across viewport edges
-		XMFLOAT3 viewportU = XMFLOAT3(viewportWidth, 0, 0);
-		XMFLOAT3 viewportV = XMFLOAT3(0, -viewportHeight, 0);
+		XMFLOAT3 viewportU;
+		XMFLOAT3 viewportV;
+		XMVECTOR viewportUVec = viewportWidth * uVec;
+		XMVECTOR viewportVVec = viewportHeight * -vVec;
+		XMStoreFloat3(&viewportU, viewportUVec);
+		XMStoreFloat3(&viewportV, viewportVVec);
 
 		// Calculate pixel to pixel delta vectors
-		pixelDeltaU = XMFLOAT3(viewportWidth / imageWidth, 0, 0);
-		pixelDeltaV = XMFLOAT3(0, -viewportHeight / imageHeight, 0);
+		pixelDeltaU = XMFLOAT3(
+			viewportU.x / imageWidth, 
+			viewportU.y / imageWidth,
+			viewportU.z / imageWidth);
+		pixelDeltaV = XMFLOAT3(
+			viewportV.x / imageHeight,
+			viewportV.y / imageHeight,
+			viewportV.z / imageHeight);
 
 		// Calculate location of upper left pixel
 		XMFLOAT3 viewportUpperLeft;
 		XMVECTOR viewportUpperLeftVector = XMLoadFloat3(&camCenter)
-			- XMVectorSet(0, 0, focalLength, 0)
-			- XMLoadFloat3(&viewportU) / 2
-			- XMLoadFloat3(&viewportV) / 2;
+			- (focusDist * wVec)
+			- (viewportUVec / 2)
+			- (viewportVVec / 2);
 		XMStoreFloat3(&viewportUpperLeft, viewportUpperLeftVector);
 
-		pixel100Loc;
 		XMVECTOR pixel100LocVector = viewportUpperLeftVector
 			+ 0.5 * (XMLoadFloat3(&pixelDeltaU) + XMLoadFloat3(&pixelDeltaV));
 		XMStoreFloat3(&pixel100Loc, pixel100LocVector);
+
+		// Calculate camera defocus disk basis vectors
+		float defocusRadius = focusDist * std::tan(DegreesToRadians(defocusAngle / 2));
+		XMStoreFloat3(&defocusDiskU, uVec * defocusRadius);
+		XMStoreFloat3(&defocusDiskV, vVec * defocusRadius);
 	}
 
 	Ray GetRay(int i, int j) const {
@@ -60,7 +91,7 @@ private:
 
 		XMStoreFloat3(&pixelSample, pixelSampleVec);
 	
-		XMFLOAT3 rayOrigin = camCenter;
+		XMFLOAT3 rayOrigin = (defocusAngle <= 0) ? camCenter : DefocusDiskSample();
 		XMFLOAT3 rayDirection = XMFLOAT3(
 			pixelSample.x - rayOrigin.x,
 			pixelSample.y - rayOrigin.y,
@@ -72,6 +103,16 @@ private:
 
 	XMFLOAT3 SampleSquare() const {
 		return XMFLOAT3(RandomDouble() - 0.5, RandomDouble() - 0.5, 0);
+	}
+
+	XMFLOAT3 DefocusDiskSample() const {
+		XMFLOAT3 p = RandomInUnitDisk();
+		XMFLOAT3 sample;
+		XMVECTOR centerVec = XMLoadFloat3(&camCenter);
+		XMVECTOR defocusUVec = XMLoadFloat3(&defocusDiskU);
+		XMVECTOR defocusVVec = XMLoadFloat3(&defocusDiskV);
+		XMStoreFloat3(&sample, centerVec + (p.x * defocusUVec) + (p.y * defocusVVec));
+		return sample;
 	}
 
 	color RayColor(const Ray& r, int depth, const Hittable& world) const {
@@ -99,9 +140,9 @@ private:
 		XMStoreFloat3(&unitDir, unitDirVector);
 
 		double a = 0.5 * (unitDir.y + 1.0);
-		return color((1.0 - a) * 1.0 + a * 0.5,
-			(1.0 - a) * 1.0 + a * 0.7,
-			(1.0 - a) * 1.0 + a * 1.0);
+		return color((1.0 - a) * 1.0 + a * 0.3,
+			(1.0 - a) * 1.0 + a * 0.0,
+			(1.0 - a) * 1.0 + a * 0.6);
 	}
 
 public: 
@@ -109,6 +150,12 @@ public:
 	int imageWidth = 100;
 	int samplesPerPixel = 10;
 	int maxDepth = 10;
+	double vfov = 90;
+	XMFLOAT3 lookFrom = XMFLOAT3(0, 0, 0);
+	XMFLOAT3 lookAt = XMFLOAT3(0, 0, -1);
+	XMFLOAT3 vup = XMFLOAT3(0, 1, 0);
+	double defocusAngle = 0;
+	double focusDist = 10;
 
 	void Render(const Hittable& world) {
 		Initialize();

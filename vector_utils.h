@@ -24,6 +24,18 @@ inline XMFLOAT3 RandomUnitVector() {
 	}
 }
 
+inline XMFLOAT3 RandomInUnitDisk() {
+	while (true) {
+		XMFLOAT3 p = XMFLOAT3(RandomDouble(-1, 1), RandomDouble(-1, 1), 0);
+		XMVECTOR pVec = XMLoadFloat3(&p);
+		float length;
+		XMStoreFloat(&length, XMVector3LengthSq(pVec));
+		if (length < 1) {
+			return p;
+		}
+	}
+}
+
 inline XMFLOAT3 RandomOnHemisphere(const XMFLOAT3& normal) {
 	XMFLOAT3 onUnitSphere = RandomUnitVector();
 	float dot;
