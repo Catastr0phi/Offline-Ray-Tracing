@@ -102,7 +102,7 @@ private:
 	}
 
 	XMFLOAT3 SampleSquare() const {
-		return XMFLOAT3(RandomDouble() - 0.5, RandomDouble() - 0.5, 0);
+		return XMFLOAT3(BetterRandom() - 0.5, BetterRandom() - 0.5, 0);
 	}
 
 	XMFLOAT3 DefocusDiskSample() const {
@@ -140,9 +140,9 @@ private:
 		XMStoreFloat3(&unitDir, unitDirVector);
 
 		double a = 0.5 * (unitDir.y + 1.0);
-		return color((1.0 - a) * 1.0 + a * 0.3,
+		return color((1.0 - a) * 1.0 + a * 0.8,
 			(1.0 - a) * 1.0 + a * 0.0,
-			(1.0 - a) * 1.0 + a * 0.6);
+			(1.0 - a) * 1.0 + a * 0.3);
 	}
 
 public: 

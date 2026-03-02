@@ -42,22 +42,23 @@ int main() {
 	//}
 
 	shared_ptr<Material> groundMat = make_shared<Lambertian>(XMFLOAT3(0.5, 0.5, 0.5));
-	world.Add(make_shared<Sphere>(XMFLOAT3(0, -1000, 0), 1000, groundMat));
+	//world.Add(make_shared<Sphere>(XMFLOAT3(0, -1000, 0), 1000, groundMat));
 
-	for (int a = -11; a < 11; a++) {
-		for (int b = -11; b < 11; b++) {
-			double chooseMat = RandomDouble();
-			XMFLOAT3 center = XMFLOAT3(a + 0.9*RandomDouble(), 0.2, b+0.9*RandomDouble());
+	for (int a = -20; a <= 20; a++) {
+		for (int b = -20; b <= 20; b++) {
+			double chooseMat = BetterRandom();
+			XMFLOAT3 center = XMFLOAT3(a/4.0 + 0.9*BetterRandom(), BetterRandom(0,10), b/4.0 + 0.9 * BetterRandom());
 			XMVECTOR centerVec = XMLoadFloat3(&center);
 			float distance;
-			XMVECTOR distanceVec = XMVector3Length(centerVec - XMVectorSet(4,0.2,0,0));
+			XMVECTOR distanceVec = XMVector3Length(centerVec - XMVectorSet(0,5,0,0));
 			XMStoreFloat(&distance, distanceVec);
 
-			if (distance > 0.9) {
+			if (distance > 4) {
 				shared_ptr<Material> sphereMat;
 
-				if (chooseMat < 0.8) {
+				if (chooseMat < 0.6) {
 					// Diffuse
+					float val = BetterRandom();
 					XMFLOAT3 albedo;
 					XMFLOAT3 rand1 = RandomFloat3();
 					XMFLOAT3 rand2 = RandomFloat3();
@@ -66,44 +67,47 @@ int main() {
 						XMLoadFloat3(&rand1) * 
 						XMLoadFloat3(&rand2));
 					sphereMat = make_shared<Lambertian>(albedo);
-					world.Add(make_shared<Sphere>(center, 0.2, sphereMat));
+					world.Add(make_shared<Sphere>(center, 0.1, sphereMat));
 				}
-				else if (chooseMat < 0.95) {
+				else if (chooseMat < 0.9) {
 					// Metal
 					XMFLOAT3 albedo = RandomFloat3(0.5,1);
-					double fuzz = RandomDouble(0, 0.5);
+					double fuzz = BetterRandom(0, 0.5);
 
 					sphereMat = make_shared<Metal>(albedo, fuzz);
-					world.Add(make_shared<Sphere>(center, 0.2, sphereMat));
+					world.Add(make_shared<Sphere>(center, 0.1, sphereMat));
 				}
 				else {
 					// Glass
 					sphereMat = make_shared<Dielectric>(1.5);
-					world.Add(make_shared<Sphere>(center, 0.2, sphereMat));
+					world.Add(make_shared<Sphere>(center, 0.1, sphereMat));
 				}
+			}
+			else {
+				b--;
 			}
 		}
 	}
 
-	shared_ptr<Material> mat1 = make_shared<Dielectric>(1.5);
-	world.Add(make_shared<Sphere>(XMFLOAT3(0, 1, 0), 1.0, mat1));
+	//shared_ptr<Material> mat1 = make_shared<Dielectric>(1.5);
+	//world.Add(make_shared<Sphere>(XMFLOAT3(0, 5, 0), 1.0, mat1));
 
-	shared_ptr<Material> mat2 = make_shared<Lambertian>(XMFLOAT3(0.4,0.2,0.1));
-	world.Add(make_shared<Sphere>(XMFLOAT3(-4, 1, 0), 1.0, mat2));
+	//shared_ptr<Material> mat2 = make_shared<Lambertian>(XMFLOAT3(0.4,0.2,0.1));
+	//world.Add(make_shared<Sphere>(XMFLOAT3(-4, 1, 0), 1.0, mat2));
 
-	shared_ptr<Material> mat3 = make_shared<Metal>(XMFLOAT3(0.7,0.6,0.5), 0.0);
-	world.Add(make_shared<Sphere>(XMFLOAT3(4, 1, 0), 1.0, mat3));
+	shared_ptr<Material> mat3 = make_shared<Metal>(XMFLOAT3(0.5,0.4,1.0), 0.0);
+	world.Add(make_shared<Sphere>(XMFLOAT3(0, 5, 0), 2.0, mat3));
 
 	Camera cam;
 
-	cam.aspectRatio = 16.0 / 9.0;
+	cam.aspectRatio = 1;
 	cam.imageWidth = 400;
-	cam.samplesPerPixel = 10;
+	cam.samplesPerPixel = 20;
 	cam.maxDepth = 50;
 
-	cam.vfov = 20;
-	cam.lookFrom = XMFLOAT3(13, 2, 3);
-	cam.lookAt = XMFLOAT3(0, 0, 0);
+	cam.vfov = 40;
+	cam.lookFrom = XMFLOAT3(10, 2, 10);
+	cam.lookAt = XMFLOAT3(0, 5, 0);
 	cam.vup = XMFLOAT3(0, 1, 0);
 
 	cam.defocusAngle = 0.6;

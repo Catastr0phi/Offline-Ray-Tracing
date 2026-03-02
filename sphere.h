@@ -23,7 +23,8 @@ public:
 
 		XMVECTOR h = XMVector3Dot(dirVec, oc);
 
-		XMVECTOR c = XMVector3LengthSq(oc) - XMLoadFloat(&radius) * XMLoadFloat(&radius);
+		XMVECTOR radiusVec = XMLoadFloat(&radius);
+		XMVECTOR c = XMVector3LengthSq(oc) - radiusVec * radiusVec;
 
 		float discriminant;
 		XMVECTOR discriminantVec = XMVectorMultiply(h, h) - XMVectorMultiply(a, c);

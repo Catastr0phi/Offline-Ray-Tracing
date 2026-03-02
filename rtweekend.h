@@ -27,6 +27,25 @@ inline double RandomDouble(double min, double max) {
 	return min + (max - min) * RandomDouble();
 }
 
+// Uses xorshift for better performance
+// Thank you Nikki for telling me about this
+inline double BetterRandom() {
+    static uint32_t state = 4;
+
+    uint32_t x = state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+
+    state = x;
+
+    return ((float)x / (float)UINT32_MAX);
+}
+
+inline double BetterRandom(float min, float max) {
+    return min + (max - min) * BetterRandom();
+}
+
 // Common headers
 #include "color.h"
 #include "ray.h"

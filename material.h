@@ -103,7 +103,7 @@ public:
 		XMFLOAT3 direction;
 		XMVECTOR directionVec;
 
-		if (cannotRefract || Reflectance(cosTheta, ri) > RandomDouble()) directionVec = XMVector3Reflect(unitDir, normal);
+		if (cannotRefract || Reflectance(cosTheta, ri) > BetterRandom()) directionVec = XMVector3Reflect(unitDir, normal);
 		else directionVec = XMVector3Refract(unitDir, normal, ri);
 
 		XMStoreFloat3(&direction, directionVec);

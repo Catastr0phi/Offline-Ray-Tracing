@@ -3,11 +3,11 @@
 #include "rtweekend.h"
 
 inline XMFLOAT3 RandomFloat3() {
-	return XMFLOAT3(RandomDouble(), RandomDouble(), RandomDouble());
+	return XMFLOAT3(BetterRandom(), BetterRandom(), BetterRandom());
 }
 
 inline XMFLOAT3 RandomFloat3(double min, double max) {
-	return XMFLOAT3(RandomDouble(min, max), RandomDouble(min, max), RandomDouble(min, max));
+	return XMFLOAT3(BetterRandom(min, max), BetterRandom(min, max), BetterRandom(min, max));
 }
 
 inline XMFLOAT3 RandomUnitVector() {
@@ -26,7 +26,7 @@ inline XMFLOAT3 RandomUnitVector() {
 
 inline XMFLOAT3 RandomInUnitDisk() {
 	while (true) {
-		XMFLOAT3 p = XMFLOAT3(RandomDouble(-1, 1), RandomDouble(-1, 1), 0);
+		XMFLOAT3 p = XMFLOAT3(BetterRandom(-1, 1), BetterRandom(-1, 1), 0);
 		XMVECTOR pVec = XMLoadFloat3(&p);
 		float length;
 		XMStoreFloat(&length, XMVector3LengthSq(pVec));
